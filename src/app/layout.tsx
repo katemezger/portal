@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider, Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Poppins, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -10,6 +10,19 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+// Stand-ins for the AIS mobile design system's licensed fonts
+// (Placard Next -> Poppins, Garet -> Nunito Sans) until real font files are supplied.
+const placardNextStandIn = Poppins({
+  variable: "--font-placard",
+  subsets: ["latin"],
+  weight: ["700", "800"],
+});
+
+const garetStandIn = Nunito_Sans({
+  variable: "--font-garet",
   subsets: ["latin"],
 });
 
@@ -25,9 +38,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${placardNextStandIn.variable} ${garetStandIn.variable} antialiased`}>
         <ClerkProvider>
-          <header className="flex justify-end items-center p-4 gap-4 h-16">
+          <header className="hidden md:flex justify-end items-center p-4 gap-4 h-16">
             <Show when="signed-out">
               <SignInButton />
               <SignUpButton>
