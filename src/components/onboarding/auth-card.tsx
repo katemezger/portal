@@ -33,6 +33,7 @@ function AuthCardInner() {
 
     const { error } = await signUp.password({ emailAddress: email, password });
     if (error) {
+      console.error("signUp.password error:", error);
       setErrorMessage(error.longMessage ?? "Something went wrong. Please try again.");
       setSubmitting(false);
       return;
@@ -40,6 +41,7 @@ function AuthCardInner() {
 
     const { error: codeError } = await signUp.verifications.sendEmailCode();
     if (codeError) {
+      console.error("signUp.password error:", error);
       setErrorMessage("Couldn't send a verification code. Please try again.");
       setSubmitting(false);
       return;
@@ -57,6 +59,7 @@ function AuthCardInner() {
 
     const { error } = await signUp.verifications.verifyEmailCode({ code });
     if (error) {
+      console.error("signUp.password error:", error); // ADD THIS
       setErrorMessage("That code didn't work — double-check it and try again.");
       setSubmitting(false);
       return;
@@ -65,6 +68,7 @@ function AuthCardInner() {
     if (signUp.status === "complete") {
       await signUp.finalize({ navigate: goToDashboard });
     } else {
+      console.error("signUp.password error:", error); // ADD THIS
       setErrorMessage("Couldn't complete sign-up. Please try again.");
       setSubmitting(false);
     }
@@ -78,6 +82,7 @@ function AuthCardInner() {
 
     const { error } = await signIn.password({ identifier: email, password });
     if (error) {
+      console.error("signUp.password error:", error); // ADD THIS
       setErrorMessage("Incorrect email or password.");
       setSubmitting(false);
       return;
@@ -184,6 +189,8 @@ function AuthCardInner() {
             {errorMessage}
           </p>
         )}
+
+        <div id="clerk-captcha" />
 
         <div className="absolute left-[30px] right-[30px] top-[325px]">
           <Button variant="auth" block type="submit" disabled={submitting}>
