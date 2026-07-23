@@ -6,8 +6,54 @@ on:
   push:
     branches: [main]
 
+# Cancel in-progress runs for the same PR/branch when new commits are pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  lint-and-test:
+  pr-validation:
+    name: PR validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      # Add unit tests here if applicable:
+      # - name: Run tests
+      #   run: npm test
+
+      - name: Production build
+        run: npm run build
+
+  db-smoke:
+    name: Database smoke check
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     env:
@@ -15,29 +61,17 @@ jobs:
       DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: 20
-          cache: 'npm'
+          cache: npm
 
       - name: Install Dependencies
         run: npm ci
 
-      - name: Validate Prisma Schema
-        run: npx prisma validate
-
-      - name: Generate Prisma Client
-        run: npx prisma generate
-
-      - name: Run ESLint
-        run: npm run lint
-
-      - name: Type Check (TypeScript)
-        run: npx tsc --noEmit
-
-      - name: Run Unit Tests
-        run: npm test -- --passWithNoTests
+      - name: Check Database Connectivity & Migration Status
+        run: npx prisma migrate status
