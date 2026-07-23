@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { Show, UserButton } from "@clerk/nextjs";
+import { Show, UserButton, useAuth } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = ["Events", "Apply", "Dashboard"] as const;
@@ -16,6 +18,8 @@ type NavbarProps = {
 };
 
 export function Navbar({ active = "Dashboard" }: NavbarProps) {
+  const { isSignedIn } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border-soft bg-white">
       <nav className="flex h-[72px] items-center gap-[21.8px] px-[38px] pb-px">
@@ -34,7 +38,11 @@ export function Navbar({ active = "Dashboard" }: NavbarProps) {
             return (
               <li key={label} className="relative px-[2px] py-[6px]">
                 <Link
-                  href={NAV_ROUTES[label]}
+                  href={
+                    label === "Dashboard" && !isSignedIn
+                      ? "/onboarding?mode=login"
+                      : NAV_ROUTES[label]
+                  }
                   className={cn(
                     "font-techno text-[16px] tracking-[0.5px]",
                     isActive ? "text-brand" : "text-ink-muted"

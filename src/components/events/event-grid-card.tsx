@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
@@ -19,10 +21,17 @@ export type EventGridItem = {
  * category tags, and an RSVP button.
  */
 export function EventGridCard({ title, meta, description, tags, eventId }: EventGridItem) {
+  const router = useRouter();
+  const { isSignedIn } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   async function handleRsvp() {
+    if (!isSignedIn) {
+      router.push("/onboarding?mode=login");
+      return;
+    }
+
     setIsSubmitting(true);
     setMessage(null);
 
